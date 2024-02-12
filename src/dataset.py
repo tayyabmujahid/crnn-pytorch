@@ -8,7 +8,7 @@ from scipy.io import wavfile
 import cv2
 from PIL import Image
 import numpy as np
-
+from torch.utils.data import DataLoader
 
 class Synth90kDataset(Dataset):
     CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -82,9 +82,66 @@ class Synth90kDataset(Dataset):
             return image
 
 
+class Synth90KSample(Dataset):
+    """
+    This is dataset for a smaller sample of the main MJSynth data
+    """
+    CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
+    CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
+    LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
+    def __init__(self, root_dir=None, mode=None,
+                 paths=None, img_height=32, img_width=100):
+        self.paths, self.texts = self._load_from_raw_files(root_dir, mode)
+
+        self.img_height = img_height
+        self.img_width = img_width
+
+    def _load_from_raw_files(self, root_dir, mode):
+        image_paths = list()
+        image_texts = list()
+        for path in os.listdir(root_dir):
+            image_paths.append(root_dir + "/" + path)
+            image_texts.append(path.split("_")[1])
+
+        return image_paths, image_texts
+
+    def __getitem__(self, index):
+        path = self.paths[index]
+        try:
+            image = Image.open(path).convert('L')  # grey-scale
+        except IOError:
+            print('Corrupted image for %d' % index)
+            return self[index + 1]
+
+        image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
+        image = np.array(image)
+        image = image.reshape((1, self.img_height, self.img_width))
+        image = (image / 127.5) - 1.0
+
+        image = torch.FloatTensor(image)
+        if self.texts:
+            text = self.texts[index]
+            target = [self.CHAR2LABEL[c] for c in text]
+            target_length = [len(target)]
+
+            target = torch.LongTensor(target)
+            target_length = torch.LongTensor(target_length)
+            return image, target, target_length
+        else:
+            return image
+
+
 def synth90k_collate_fn(batch):
     images, targets, target_lengths = zip(*batch)
     images = torch.stack(images, 0)
     targets = torch.cat(targets, 0)
     target_lengths = torch.cat(target_lengths, 0)
     return images, targets, target_lengths
+
+
+if __name__ == '__main__':
+    dataset = Synth90KSample(path = "/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
+
+
+    train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+    test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)

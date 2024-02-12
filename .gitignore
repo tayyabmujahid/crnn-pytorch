@@ -117,3 +117,15 @@ venv.bak/
 # ssl key files
 */key/ssl.crt
 */key/ssl.key
+
+
+#data related
+data/mjsynth_sample
+data/mjsynth.tar.gz
+data/mjsynth_sample.zip
+
+
+#pycharm related
+.idea
+
+
