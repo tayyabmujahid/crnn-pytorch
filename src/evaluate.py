@@ -11,6 +11,10 @@ from config import evaluate_config as config
 torch.backends.cudnn.enabled = False
 
 
+def evaluate_word_spotting(crnn, dataloader):
+    pass
+
+
 def evaluate(crnn, dataloader, criterion,
              max_iter=None, decode_method='beam_search', beam_size=10):
     crnn.eval()
@@ -80,7 +84,7 @@ def main():
     #                                img_height=img_height, img_width=img_width)
 
     test_dataset = Synth90KSample(root_dir=config['sample_data_dir'], mode='test',
-                                   img_height=img_height, img_width=img_width)
+                                  img_height=img_height, img_width=img_width)
 
     test_loader = DataLoader(
         dataset=test_dataset,

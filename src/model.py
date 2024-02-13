@@ -87,4 +87,4 @@ class CRNN(nn.Module):
         recurrent, _ = self.rnn2(recurrent)
 
         output = self.dense(recurrent)
-        return output  # shape: (seq_len, batch, num_class)
+        return output,recurrent  # shape: (seq_len, batch, num_class)
