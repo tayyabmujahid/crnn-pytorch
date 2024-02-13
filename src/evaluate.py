@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torch.nn import CTCLoss
 from tqdm import tqdm
 
-from dataset import Synth90kDataset, synth90k_collate_fn
+from dataset import Synth90kDataset, synth90k_collate_fn, Synth90KSample
 from model import CRNN
 from ctc_decoder import ctc_decode
 from config import evaluate_config as config
@@ -76,7 +76,10 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'device: {device}')
 
-    test_dataset = Synth90kDataset(root_dir=config['data_dir'], mode='test',
+    # test_dataset = Synth90kDataset(root_dir=config['data_dir'], mode='test',
+    #                                img_height=img_height, img_width=img_width)
+
+    test_dataset = Synth90KSample(root_dir=config['sample_data_dir'], mode='test',
                                    img_height=img_height, img_width=img_width)
 
     test_loader = DataLoader(

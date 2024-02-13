@@ -10,6 +10,7 @@ from PIL import Image
 import numpy as np
 from torch.utils.data import DataLoader
 
+
 class Synth90kDataset(Dataset):
     CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
@@ -86,15 +87,19 @@ class Synth90KSample(Dataset):
     """
     This is dataset for a smaller sample of the main MJSynth data
     """
-    CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
+    CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
+
     def __init__(self, root_dir=None, mode=None,
-                 paths=None, img_height=32, img_width=100):
+                 img_height=32, img_width=100):
         self.paths, self.texts = self._load_from_raw_files(root_dir, mode)
 
         self.img_height = img_height
         self.img_width = img_width
+
+    def __len__(self):
+        return len(self.paths)
 
     def _load_from_raw_files(self, root_dir, mode):
         image_paths = list()
@@ -115,7 +120,9 @@ class Synth90KSample(Dataset):
 
         image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
         image = np.array(image)
+
         image = image.reshape((1, self.img_height, self.img_width))
+
         image = (image / 127.5) - 1.0
 
         image = torch.FloatTensor(image)
@@ -138,10 +145,11 @@ def synth90k_collate_fn(batch):
     target_lengths = torch.cat(target_lengths, 0)
     return images, targets, target_lengths
 
+# import torch.nn as nn
+# class TestNetwork(nn.Module):
 
-if __name__ == '__main__':
-    dataset = Synth90KSample(path = "/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
+# if __name__ == '__main__':
+#     dataset = Synth90KSample(root_dir="/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
+#
+#     # train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 
-
-    train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
-    test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
