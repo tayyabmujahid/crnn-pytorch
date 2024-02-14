@@ -12,7 +12,24 @@ torch.backends.cudnn.enabled = False
 
 
 def evaluate_word_spotting(crnn, dataloader):
-    pass
+    preds_list = list()
+    targets_list = list()
+    crnn.eval()
+    pbar_total = len(dataloader)
+    pbar = tqdm(total=pbar_total, desc="Wordspotting Evaluate")
+
+    with torch.no_grad():
+        for i, data in enumerate(tqdm(dataloader)):
+            device = 'cuda' if next(crnn.parameters()).is_cuda else 'cpu'
+
+            images, targets, target_lengths = [d.to(device) for d in data]
+            targets_list.append(targets)
+
+            _, recurrent = crnn(images)
+            pred_vec = torch.squeeze(pred_vec)
+            pred_vec = torch.mean(pred_vec, 1)
+            preds_list.append(pred_vec)
+
 
 
 def evaluate(crnn, dataloader, criterion,
