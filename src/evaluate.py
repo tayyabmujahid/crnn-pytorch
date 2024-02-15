@@ -25,7 +25,7 @@ def evaluate_word_spotting(crnn, dataloader):
             images, targets, target_lengths = [d.to(device) for d in data]
             targets_list.append(targets)
 
-            _, recurrent = crnn(images)
+            _, pred_vec = crnn(images)
             pred_vec = torch.squeeze(pred_vec)
             pred_vec = torch.mean(pred_vec, 1)
             preds_list.append(pred_vec)

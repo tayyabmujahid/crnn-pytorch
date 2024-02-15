@@ -83,7 +83,7 @@ class Synth90kDataset(Dataset):
             return image
 
 
-class Synth90KSample(Dataset):
+class Synth90kSample(Dataset):
     """
     This is dataset for a smaller sample of the main MJSynth data
     """
@@ -92,8 +92,8 @@ class Synth90KSample(Dataset):
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
     def __init__(self, root_dir=None, mode=None,
-                 img_height=32, img_width=100):
-        self.paths, self.texts = self._load_from_raw_files(root_dir, mode)
+                 img_height=32, img_width=100, word_len=2):
+        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, word_len)
 
         self.img_height = img_height
         self.img_width = img_width
@@ -101,12 +101,14 @@ class Synth90KSample(Dataset):
     def __len__(self):
         return len(self.paths)
 
-    def _load_from_raw_files(self, root_dir, mode):
+    def _load_from_raw_files(self, root_dir, mode, word_len):
         image_paths = list()
         image_texts = list()
         for path in os.listdir(root_dir):
-            image_paths.append(root_dir + "/" + path)
-            image_texts.append(path.split("_")[1])
+            image_text = path.split("_")[1]
+            if len(image_text) > word_len:
+                image_paths.append(root_dir + "/" + path)
+                image_texts.append(path.split("_")[1])
 
         return image_paths, image_texts
 
@@ -145,11 +147,8 @@ def synth90k_collate_fn(batch):
     target_lengths = torch.cat(target_lengths, 0)
     return images, targets, target_lengths
 
-# import torch.nn as nn
-# class TestNetwork(nn.Module):
 
 # if __name__ == '__main__':
-#     dataset = Synth90KSample(root_dir="/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
-#
-#     # train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+#     dataset = Synth90kSample(root_dir="/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
+#     train_dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
