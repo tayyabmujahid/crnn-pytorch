@@ -93,7 +93,7 @@ class Synth90kSample(Dataset):
 
     def __init__(self, root_dir=None, mode=None,split=None,
                  img_height=32, img_width=100, word_len=2):
-        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, word_len)
+        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, split,word_len)
 
         self.img_height = img_height
         self.img_width = img_width
