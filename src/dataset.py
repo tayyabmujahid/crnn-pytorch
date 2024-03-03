@@ -104,7 +104,7 @@ class Synth90kSample(Dataset):
     def _load_from_raw_files(self, root_dir, mode, word_len):
         paths = os.listdir(root_dir)
         length = len(paths)
-        split = 0.9
+        split = 0.7
         if mode=='validation':
             paths = paths[int(split*length):]
 
