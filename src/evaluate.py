@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torch.nn import CTCLoss
 from tqdm import tqdm
 
-from dataset import Synth90kDataset, synth90k_collate_fn, Synth90KSample
+from dataset import Synth90kDataset, synth90k_collate_fn, Synth90kSample
 from model import CRNN
 from ctc_decoder import ctc_decode
 from config import evaluate_config as config
@@ -100,7 +100,7 @@ def main():
     # test_dataset = Synth90kDataset(root_dir=config['data_dir'], mode='test',
     #                                img_height=img_height, img_width=img_width)
 
-    test_dataset = Synth90KSample(root_dir=config['sample_data_dir'], mode='test',
+    test_dataset = Synth90kSample(root_dir=config['sample_data_dir'], mode='test',
                                   img_height=img_height, img_width=img_width)
 
     test_loader = DataLoader(
