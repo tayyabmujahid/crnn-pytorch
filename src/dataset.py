@@ -91,7 +91,7 @@ class Synth90kSample(Dataset):
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
-    def __init__(self, root_dir=None, mode=None,
+    def __init__(self, root_dir=None, mode=None,split=None,
                  img_height=32, img_width=100, word_len=2):
         self.paths, self.texts = self._load_from_raw_files(root_dir, mode, word_len)
 
