@@ -102,9 +102,15 @@ class Synth90kSample(Dataset):
         return len(self.paths)
 
     def _load_from_raw_files(self, root_dir, mode, word_len):
+        paths = os.listdir(root_dir)
+        length = len(paths)
+        split = 0.9
+        if mode=='validation':
+            paths = paths[split*length:]
+
         image_paths = list()
         image_texts = list()
-        for path in os.listdir(root_dir):
+        for path in paths:
             image_text = path.split("_")[1]
             if len(image_text) > word_len:
                 image_paths.append(root_dir + "/" + path)
