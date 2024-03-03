@@ -106,7 +106,7 @@ class Synth90kSample(Dataset):
         length = len(paths)
         split = 0.9
         if mode=='validation':
-            paths = paths[split*length:]
+            paths = paths[int(split*length):]
 
         image_paths = list()
         image_texts = list()
