@@ -101,10 +101,9 @@ class Synth90kSample(Dataset):
     def __len__(self):
         return len(self.paths)
 
-    def _load_from_raw_files(self, root_dir, mode, word_len):
+    def _load_from_raw_files(self, root_dir, mode, split, word_len):
         paths = os.listdir(root_dir)
         length = len(paths)
-        split = 0.7
         if mode=='validation':
             paths = paths[int(split*length):]
 
