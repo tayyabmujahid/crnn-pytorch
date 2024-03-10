@@ -9,7 +9,7 @@ import cv2
 from PIL import Image
 import numpy as np
 from torch.utils.data import DataLoader
-
+import random
 from src.paths import IAM_RULE_DIR
 
 
@@ -199,7 +199,7 @@ class IAMDataset2(Dataset):
         self.line_folders, self.line_dirs = self.create_line_dirs()
         self.samples, self.word_strings = self.get_word_labels()
         self.labels_encoder()
-        pass
+
 
     def get_unique_word_strings(self):
         unique_word_strings, counts = np.unique(self.word_strings, return_counts=True)
