@@ -51,10 +51,10 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'device: {device}')
 
-    train_dataset = Synth90kDataset(root_dir=data_dir, mode='train',
-                                    img_height=img_height, img_width=img_width)
-    valid_dataset = Synth90kDataset(root_dir=data_dir, mode='dev',
-                                    img_height=img_height, img_width=img_width)
+    # train_dataset = Synth90kDataset(root_dir=data_dir, mode='train',
+    #                                 img_height=img_height, img_width=img_width)
+    # valid_dataset = Synth90kDataset(root_dir=data_dir, mode='dev',
+    #                                 img_height=img_height, img_width=img_width)
     train_dataset = IAMDataset2(ttype='train',img_height=img_height,
                                 img_width=img_width)
     test_dataset = IAMDataset2(ttype='test', img_height=img_height,
