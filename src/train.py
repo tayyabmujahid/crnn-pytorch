@@ -57,7 +57,7 @@ def main():
     #                                 img_height=img_height, img_width=img_width)
     train_dataset = IAMDataset2(ttype='train',img_height=img_height,
                                 img_width=img_width)
-    test_dataset = IAMDataset2(ttype='test', img_height=img_height,
+    valid_dataset = IAMDataset2(ttype='test', img_height=img_height,
                                 img_width=img_width)
 
 
