@@ -1,5 +1,9 @@
+import logging
 import os
 import glob
+import pathlib
+import random
+from xml.etree import ElementTree as ET
 from sklearn.preprocessing import LabelEncoder
 import torch
 from torch.utils.data import Dataset
@@ -9,8 +13,16 @@ import cv2
 from PIL import Image
 import numpy as np
 from torch.utils.data import DataLoader
-import random
-from src.paths import IAM_RULE_DIR
+import pathlib
+
+file_path = pathlib.Path(__file__)
+ROOT = file_path.parent.parent
+DATA_DIR = ROOT / "data"
+IAM_DIR = DATA_DIR / "IAM_HW"
+IAM_WORDS_DIR = IAM_DIR / 'words'
+IAM_XML_DIR = IAM_DIR / "xml"
+IAM_RULE_DIR = IAM_DIR / "rules"
+RUNS = ROOT / 'runs'
 
 
 class Synth90kDataset(Dataset):
@@ -93,9 +105,9 @@ class Synth90kSample(Dataset):
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
-    def __init__(self, root_dir=None, mode=None,split=None,
+    def __init__(self, root_dir=None, mode=None, split=None,
                  img_height=32, img_width=100, word_len=2):
-        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, split,word_len)
+        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, split, word_len)
 
         self.img_height = img_height
         self.img_width = img_width
@@ -106,8 +118,8 @@ class Synth90kSample(Dataset):
     def _load_from_raw_files(self, root_dir, mode, split, word_len):
         paths = os.listdir(root_dir)
         length = len(paths)
-        if mode=='validation':
-            paths = paths[int(split*length):]
+        if mode == 'validation':
+            paths = paths[int(split * length):]
 
         image_paths = list()
         image_texts = list()
@@ -147,25 +159,6 @@ class Synth90kSample(Dataset):
             return image
 
 
-class IAMDataset(Dataset):
-    def __init__(self, root_dir=None, mode=None,
-                 img_height=32, img_width=100, word_len=2):
-        self.paths, self.texts = self._load_from_raw_files(root_dir, mode, word_len)
-
-        self.img_height = img_height
-        self.img_width = img_width
-
-
-class IAMDataset(BaseDataset):
-    """
-    train_root_dir = '/home/mujahid/PycharmProjects/ssl_wordspotting/data/IEHR/words_training'
-    test_root_dir = '/home/mujahid/PycharmProjects/ssl_wordspotting/data/IEHR/words_test'
-    train_dataset = IAMDataset(train_root_dir)
-    test_dataset = IAMDataset(test_root_dir)
-    """
-    pass
-
-
 ## images : words/l1/l1-l2/l1-l2-ldx-idx.png : sample
 ## l1 -  sample_group_root_dir
 ## l1-l2 - sample_group_dir
@@ -178,28 +171,25 @@ class IAMDataset2(Dataset):
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
-    def __init__(self, root_dir, mode=None, paths=None, img_height=32, img_width=100):
-        if root_dir and mode and not paths:
-            paths, texts = self._load_from_raw_files(root_dir, mode)
-        elif not root_dir and not mode and paths:
-            texts = None
-        self.paths = paths
-        self.texts = texts
+    def __init__(self, ttype, img_height=32, img_width=100,
+                 word_len=2, transform=None):
         self.img_height = img_height
         self.img_width = img_width
-
-    def _load_from_raw_files(self, root_dir, mode):
-        if mode == 'train':
+        self.word_len = word_len
+        self.label_encoder = None
+        self.query_list = None
+        self.transform = transform
+        self.ttype = ttype
+        if ttype == 'train':
             self.rule_file_path = IAM_RULE_DIR / "trainset.txt"
-        elif mode == 'test':
+        elif ttype == 'test':
             self.rule_file_path = IAM_RULE_DIR / "testset.txt"
-        elif mode == 'val':
+        elif ttype == 'val':
             self.rule_file_path = IAM_RULE_DIR / "validationset1.txt"
         self.line_folders = None
         self.line_folders, self.line_dirs = self.create_line_dirs()
         self.samples, self.word_strings = self.get_word_labels()
         self.labels_encoder()
-
 
     def get_unique_word_strings(self):
         unique_word_strings, counts = np.unique(self.word_strings, return_counts=True)
@@ -222,15 +212,27 @@ class IAMDataset2(Dataset):
     def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, idx):
-        img_id, img_path, label = self.samples[idx]
-        encoded_label = self.label_encoder.transform([label])
-        img = Image.open(img_path)
-        if self.transform:
-            img = self.transform(img)
+    def __getitem__(self, index):
+        img_id, img_path, text = self.samples[index]
+        target = [self.CHAR2LABEL[c] for c in text]
+        target_length = [len(target)]
+        try:
+            image = Image.open(img_path).convert('L')
+            image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
+            image = np.array(image)
+            image = (image / 127.5) - 1.0
+            image = torch.FloatTensor(image)
+            if self.transform:
+                image = self.transform(image)
         # is_query = self.query_list[idx]
         # return img_id, img, label, encoded_label[0], is_query
-        return img_id, img, label, encoded_label[0]
+
+        except:
+            print('Corrupted image for %d' % index)
+            return self[index + 1]
+
+        # return img_id, img, text, encoded_label[0]
+        return image, target, target_length
 
     def get_xml_file_object(self, path):
         tree = ET.parse(path)
@@ -249,9 +251,10 @@ class IAMDataset2(Dataset):
                 img_id = word.get('id')
                 if img_id == word_id:
                     label = word.get('text')
-                    ll.append((word_id, word_path, label))
-                    labels.append(label)
-
+                    len_label = len(label)
+                    if len_label > self.word_len:
+                        ll.append((word_id, word_path, label))
+                        labels.append(label)
         return ll, labels
 
     def construct_xml_file_paths(self, word_ids):
@@ -304,7 +307,10 @@ class IAMDataset2(Dataset):
         return image_names
 
     def get_random_samples(self, number=9):
+
         random_samples = random.sample(self.samples, number)
+        random_samples = [(Image.open(sample[1]), sample[2]) for sample in random_samples]
+        random_samples = [(self.transform(sample[0]), sample[1]) for sample in random_samples]
         return random_samples
 
 
