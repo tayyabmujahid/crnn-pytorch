@@ -1,7 +1,7 @@
 import pathlib
 
 file_path = pathlib.Path(__file__)
-ROOT = file_path.parent
+ROOT = file_path.parent.parent
 DATA_DIR = ROOT / "data"
 IAM_DIR = DATA_DIR / "IAM_HW"
 IAM_WORDS_DIR = IAM_DIR / 'words'
