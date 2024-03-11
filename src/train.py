@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.nn import CTCLoss
 
-from dataset import Synth90kDataset, synth90k_collate_fn
+from dataset import Synth90kDataset, synth90k_collate_fn, IAMDataset2
 from model import CRNN
 from evaluate import evaluate
 from config import train_config as config
@@ -55,6 +55,11 @@ def main():
                                     img_height=img_height, img_width=img_width)
     valid_dataset = Synth90kDataset(root_dir=data_dir, mode='dev',
                                     img_height=img_height, img_width=img_width)
+    train_dataset = IAMDataset2(ttype='train',img_height=img_height,
+                                img_width=img_width)
+    test_dataset = IAMDataset2(ttype='test', img_height=img_height,
+                                img_width=img_width)
+
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -69,7 +74,8 @@ def main():
         num_workers=cpu_workers,
         collate_fn=synth90k_collate_fn)
 
-    num_class = len(Synth90kDataset.LABEL2CHAR) + 1
+    # num_class = len(Synth90kDataset.LABEL2CHAR) + 1
+    num_class = len(IAMDataset2.LABEL2CHAR) + 1
     crnn = CRNN(1, img_height, img_width, num_class,
                 map_to_seq_hidden=config['map_to_seq_hidden'],
                 rnn_hidden=config['rnn_hidden'],
