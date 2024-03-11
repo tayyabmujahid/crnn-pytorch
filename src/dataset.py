@@ -229,6 +229,7 @@ class IAMDataset2(Dataset):
             image = Image.open(img_path).convert('L')
             image = image.resize((self.img_width, self.img_height), resample=Image.BILINEAR)
             image = np.array(image)
+            image = np.expand_dims(image, axis=0)
             image = (image / 127.5) - 1.0
             image = torch.FloatTensor(image)
             if self.transform:
