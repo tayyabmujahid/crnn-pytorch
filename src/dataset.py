@@ -167,7 +167,7 @@ class Synth90kSample(Dataset):
 
 
 class IAMDataset2(Dataset):
-    CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
+    CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
@@ -190,6 +190,15 @@ class IAMDataset2(Dataset):
         self.line_folders, self.line_dirs = self.create_line_dirs()
         self.samples, self.word_strings = self.get_word_labels()
         self.labels_encoder()
+
+    def normalize_word_string(self, word_string):
+        word_string = word_string.replace(',', '')
+        word_string = word_string.replace('.', '')
+        word_string = word_string.replace(',', '')
+        word_string = word_string.replace('-', '')
+        word_string = word_string.replace('"', '')
+        word_string = word_string.replace('\'', '')
+        return word_string
 
     def get_unique_word_strings(self):
         unique_word_strings, counts = np.unique(self.word_strings, return_counts=True)
@@ -230,7 +239,8 @@ class IAMDataset2(Dataset):
         except:
             print('Corrupted image for %d' % index)
             return self[index + 1]
-
+        target = torch.LongTensor(target)
+        target_length = torch.LongTensor(target_length)
         # return img_id, img, text, encoded_label[0]
         return image, target, target_length
 
@@ -251,6 +261,7 @@ class IAMDataset2(Dataset):
                 img_id = word.get('id')
                 if img_id == word_id:
                     label = word.get('text')
+                    label = self.normalize_word_string(label)
                     len_label = len(label)
                     if len_label > self.word_len:
                         ll.append((word_id, word_path, label))
