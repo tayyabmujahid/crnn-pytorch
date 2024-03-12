@@ -16,7 +16,8 @@ def train_batch(crnn, data, optimizer, criterion, device):
     crnn.train()
     images, targets, target_lengths = [d.to(device) for d in data]
 
-    logits = crnn(images)
+    logits, _ = crnn(images)
+
     log_probs = torch.nn.functional.log_softmax(logits, dim=2)
 
     batch_size = images.size(0)
@@ -81,6 +82,7 @@ def main():
                 rnn_hidden=config['rnn_hidden'],
                 leaky_relu=config['leaky_relu'])
     if reload_checkpoint:
+        print("Reloading Checkpoint")
         crnn.load_state_dict(torch.load(reload_checkpoint, map_location=device))
     crnn.to(device)
 

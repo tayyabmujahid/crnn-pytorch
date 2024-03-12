@@ -167,11 +167,11 @@ class Synth90kSample(Dataset):
 
 
 class IAMDataset2(Dataset):
-    CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
 
-    def __init__(self, ttype, img_height=32, img_width=100,
+    def __init__(self, ttype, root_dir=IAM_RULE_DIR,img_height=32, img_width=100,
                  word_len=2, transform=None):
         self.img_height = img_height
         self.img_width = img_width
@@ -181,23 +181,27 @@ class IAMDataset2(Dataset):
         self.transform = transform
         self.ttype = ttype
         if ttype == 'train':
-            self.rule_file_path = IAM_RULE_DIR / "trainset.txt"
+            self.rule_file_path = root_dir / "trainset.txt"
         elif ttype == 'test':
-            self.rule_file_path = IAM_RULE_DIR / "testset.txt"
+            self.rule_file_path = root_dir / "testset.txt"
         elif ttype == 'val':
-            self.rule_file_path = IAM_RULE_DIR / "validationset1.txt"
+            self.rule_file_path = root_dir / "validationset1.txt"
         self.line_folders = None
         self.line_folders, self.line_dirs = self.create_line_dirs()
         self.samples, self.word_strings = self.get_word_labels()
         self.labels_encoder()
 
     def normalize_word_string(self, word_string):
+        word_string = word_string.lower()
+        word_string = word_string.replace(' ', '')
         word_string = word_string.replace(',', '')
         word_string = word_string.replace('.', '')
         word_string = word_string.replace(',', '')
         word_string = word_string.replace('-', '')
         word_string = word_string.replace('"', '')
         word_string = word_string.replace('\'', '')
+        word_string = word_string.replace('/', '')
+        word_string = ''.join(e for e in word_string if e.isalnum())
         return word_string
 
     def get_unique_word_strings(self):

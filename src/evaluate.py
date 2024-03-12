@@ -52,7 +52,7 @@ def evaluate(crnn, dataloader, criterion,
 
             images, targets, target_lengths = [d.to(device) for d in data]
 
-            logits = crnn(images)
+            logits,_ = crnn(images)
             log_probs = torch.nn.functional.log_softmax(logits, dim=2)
 
             batch_size = images.size(0)
