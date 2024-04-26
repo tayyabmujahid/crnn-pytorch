@@ -170,6 +170,7 @@ class IAMDataset2(Dataset):
     CHARS = '0123456789abcdefghijklmnopqrstuvwxyz'
     CHAR2LABEL = {char: i + 1 for i, char in enumerate(CHARS)}
     LABEL2CHAR = {label: char for char, label in CHAR2LABEL.items()}
+    NAME = 'iam'
 
     def __init__(self, ttype, root_dir=IAM_RULE_DIR,img_height=32, img_width=100,
                  word_len=2, transform=None):

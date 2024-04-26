@@ -77,6 +77,7 @@ def main():
 
     # num_class = len(Synth90kDataset.LABEL2CHAR) + 1
     num_class = len(IAMDataset2.LABEL2CHAR) + 1
+    dataset_name = IAMDataset2.NAME
     crnn = CRNN(1, img_height, img_width, num_class,
                 map_to_seq_hidden=config['map_to_seq_hidden'],
                 rnn_hidden=config['rnn_hidden'],
@@ -112,7 +113,7 @@ def main():
                 print('valid_evaluation: loss={loss}, acc={acc}'.format(**evaluation))
 
                 if i % save_interval == 0:
-                    prefix = 'crnn'
+                    prefix = 'crnn' + f'_{dataset_name}'
                     loss = evaluation['loss']
                     save_model_path = os.path.join(config['checkpoints_dir'],
                                                    f'{prefix}_{i:06}_loss{loss}.pt')
