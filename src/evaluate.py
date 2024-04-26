@@ -7,16 +7,17 @@ from dataset import Synth90kDataset, synth90k_collate_fn, Synth90kSample
 from model import CRNN
 from ctc_decoder import ctc_decode
 from config import evaluate_config as config
-
+from src.metrics import map_from_feature_matrix
+import numpy as np
 torch.backends.cudnn.enabled = False
 
 
-def evaluate_word_spotting(crnn, dataloader):
+def evaluate_word_spotting(crnn, dataset, dataloader):
     preds_list = list()
     targets_list = list()
     crnn.eval()
     pbar_total = len(dataloader)
-    pbar = tqdm(total=pbar_total, desc="Wordspotting Evaluate")
+    pbar = tqdm(total=pbar_total, desc="Wordspotting Evaluation")
 
     with torch.no_grad():
         for i, data in enumerate(tqdm(dataloader)):
@@ -29,6 +30,20 @@ def evaluate_word_spotting(crnn, dataloader):
             pred_vec = torch.squeeze(pred_vec)
             pred_vec = torch.mean(pred_vec, 1)
             preds_list.append(pred_vec)
+            pbar.update(1)
+            pbar.close()
+    preds_array = [list(i.T) for i in preds_list]
+    preds_array = [item for sublist in preds_array for item in sublist]
+    preds_array = np.array(preds_array)
+    lbl_array = dataset.wordstring
+    mAP, avg_precs = map_from_feature_matrix(preds_array, lbl_array, 'euclidean', False)
+
+
+    evaluation = {
+        "mAP":mAP,
+        "ave_precs":avg_precs
+    }
+    return evaluation
 
 
 

@@ -14,7 +14,7 @@ train_config = {
     'train_batch_size': 32,
     'eval_batch_size': 512,
     'lr': 0.0005,
-    'show_interval': 10,
+    'show_interval': 500,
     'valid_interval': 500,
     'save_interval': 2000,
     'cpu_workers': 4,

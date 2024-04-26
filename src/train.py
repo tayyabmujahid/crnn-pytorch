@@ -8,7 +8,7 @@ from torch.nn import CTCLoss
 
 from dataset import Synth90kDataset, synth90k_collate_fn, IAMDataset2
 from model import CRNN
-from evaluate import evaluate
+from evaluate import evaluate, evaluate_word_spotting
 from config import train_config as config
 
 
@@ -28,7 +28,7 @@ def train_batch(crnn, data, optimizer, criterion, device):
 
     optimizer.zero_grad()
     loss.backward()
-    torch.nn.utils.clip_grad_norm_(crnn.parameters(), 5) # gradient clipping with 5
+    torch.nn.utils.clip_grad_norm_(crnn.parameters(), 5)  # gradient clipping with 5
     optimizer.step()
     return loss.item()
 
@@ -56,11 +56,10 @@ def main():
     #                                 img_height=img_height, img_width=img_width)
     # valid_dataset = Synth90kDataset(root_dir=data_dir, mode='dev',
     #                                 img_height=img_height, img_width=img_width)
-    train_dataset = IAMDataset2(ttype='train',img_height=img_height,
+    train_dataset = IAMDataset2(ttype='train', img_height=img_height,
                                 img_width=img_width)
     valid_dataset = IAMDataset2(ttype='test', img_height=img_height,
                                 img_width=img_width)
-
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -111,7 +110,10 @@ def main():
                                       decode_method=config['decode_method'],
                                       beam_size=config['beam_size'])
                 print('valid_evaluation: loss={loss}, acc={acc}'.format(**evaluation))
+                wrd_spotting_evaluation = evaluate_word_spotting(crnn, valid_dataset, valid_loader)
 
+                print('wrd _spotting_evaluation: mAP={map}, avg_precs={avg_precs}'.format(**wrd_spotting_evaluation))
+                print('='*50)
                 if i % save_interval == 0:
                     prefix = 'crnn' + f'_{dataset_name}'
                     loss = evaluation['loss']
