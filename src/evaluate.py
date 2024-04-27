@@ -33,11 +33,12 @@ def evaluate_word_spotting(crnn, dataset, dataloader):
             pred_vec = pred_vec.cpu().detach().numpy()
             preds_list.append(pred_vec)
             pbar.update(1)
-            pbar.close()
+    pbar.close()
     preds_array = [list(i.T) for i in preds_list]
+    lbl_array = dataset.word_string
     preds_array = [item for sublist in preds_array for item in sublist]
     preds_array = np.array(preds_array)
-    lbl_array = dataset.word_string
+
     mAP, avg_precs = map_from_feature_matrix(preds_array, lbl_array, 'euclidean', False)
 
     evaluation = {
