@@ -7,8 +7,9 @@ from dataset import Synth90kDataset, synth90k_collate_fn, Synth90kSample
 from model import CRNN
 from ctc_decoder import ctc_decode
 from config import evaluate_config as config
-from src.metrics import map_from_feature_matrix
+from metrics import map_from_feature_matrix
 import numpy as np
+
 torch.backends.cudnn.enabled = False
 
 
@@ -29,22 +30,21 @@ def evaluate_word_spotting(crnn, dataset, dataloader):
             _, pred_vec = crnn(images)
             pred_vec = torch.squeeze(pred_vec)
             pred_vec = torch.mean(pred_vec, 1)
+            pred_vec = pred_vec.cpu().detach().numpy()
             preds_list.append(pred_vec)
             pbar.update(1)
             pbar.close()
     preds_array = [list(i.T) for i in preds_list]
     preds_array = [item for sublist in preds_array for item in sublist]
     preds_array = np.array(preds_array)
-    lbl_array = dataset.wordstring
+    lbl_array = dataset.word_string
     mAP, avg_precs = map_from_feature_matrix(preds_array, lbl_array, 'euclidean', False)
 
-
     evaluation = {
-        "mAP":mAP,
-        "ave_precs":avg_precs
+        "mAP": mAP,
+        "ave_precs": avg_precs
     }
     return evaluation
-
 
 
 def evaluate(crnn, dataloader, criterion,
@@ -67,7 +67,7 @@ def evaluate(crnn, dataloader, criterion,
 
             images, targets, target_lengths = [d.to(device) for d in data]
 
-            logits,_ = crnn(images)
+            logits, _ = crnn(images)
             log_probs = torch.nn.functional.log_softmax(logits, dim=2)
 
             batch_size = images.size(0)
