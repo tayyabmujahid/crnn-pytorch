@@ -18,7 +18,7 @@ train_config = {
     'valid_interval': 500,
     'save_interval': 2000,
     'cpu_workers': 4,
-    'reload_checkpoint': '',
+    'reload_checkpoint': 'checkpoints/crnn_synth90k.pt',
     'valid_max_iter': 100,
     'decode_method': 'greedy',
     'beam_size': 10,
