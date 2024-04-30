@@ -34,6 +34,7 @@ def evaluate_word_spotting(crnn, dataset, dataloader):
             preds_list.append(pred_vec)
             pbar.update(1)
     pbar.close()
+    print("starting MAP calculations")
     preds_array = [list(i.T) for i in preds_list]
     lbl_array = dataset.word_strings
     preds_array = [item for sublist in preds_array for item in sublist]
