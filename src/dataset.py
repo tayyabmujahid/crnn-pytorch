@@ -393,7 +393,7 @@ class IAMDataset3(Dataset):
         target = [self.CHAR2LABEL[c] for c in text]
         target_length = [len(target)]
         
-        image = Image.open(img_path)
+        image = Image.open(img_path).convert('RGB')
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
             
         return pixel_values, target, target_length
