@@ -12,3 +12,6 @@ scipy              # via -r requirements.in
 six               # via -r requirements.in
 torch              # via -r requirements.in
 tqdm              # via -r requirements.in
+huggingface
+scikit-learn
+transformers

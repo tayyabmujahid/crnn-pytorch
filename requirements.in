@@ -6,5 +6,6 @@ scipy
 opencv-python
 tqdm
 docopt
+huggingface
 
 

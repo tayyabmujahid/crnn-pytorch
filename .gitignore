@@ -124,7 +124,7 @@ data/mjsynth_sample
 data/mjsynth.tar.gz
 data/mjsynth_sample.zip
 data/IAM_HW
-
+data/
 
 #pycharm related
 .idea
