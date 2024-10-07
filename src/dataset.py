@@ -395,6 +395,8 @@ class IAMDataset3(Dataset):
         
         image = Image.open(img_path).convert('RGB')
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
+        print(type(pixel_values))
+        print(pixel_values.shape)
             
         return pixel_values, target, target_length
 
