@@ -395,6 +395,7 @@ class IAMDataset3(Dataset):
         
         image = Image.open(img_path).convert('RGB')
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
+        pixel_values = torch.squeeze(pixel_values)
         print(type(pixel_values))
         print(pixel_values.shape)
             
@@ -488,4 +489,4 @@ def synth90k_collate_fn(batch):
 
 # if __name__ == '__main__':
 #     dataset = Synth90kSample(root_dir="/home/mujahid/PycharmProjects/crnn-pytorch/data/mjsynth_sample")
-#     train_dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+    train_dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
