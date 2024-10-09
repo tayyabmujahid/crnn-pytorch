@@ -395,9 +395,13 @@ class IAMDataset3(Dataset):
         
         image = Image.open(img_path).convert('RGB')
         pixel_values = self.processor(image, return_tensors="pt").pixel_values
-        pixel_values = torch.squeeze(pixel_values)
-        print(type(pixel_values))
-        print(pixel_values.shape)
+        pixel_values = torch.squeeze(pixel_values)[0]
+        pixel_values = torch.unsqueeze(pixel_values,0)
+
+        # print(type(pixel_values))
+        # print(pixel_values.shape)
+        target = torch.LongTensor(target)
+        target_length = torch.LongTensor(target_length)
             
         return pixel_values, target, target_length
 
