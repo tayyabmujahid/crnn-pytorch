@@ -392,16 +392,19 @@ class IAMDataset3(Dataset):
         img_id, img_path, text = self.samples[index]
         target = [self.CHAR2LABEL[c] for c in text]
         target_length = [len(target)]
-        
-        image = Image.open(img_path).convert('RGB')
-        pixel_values = self.processor(image, return_tensors="pt").pixel_values
-        pixel_values = torch.squeeze(pixel_values)[0]
-        pixel_values = torch.unsqueeze(pixel_values,0)
+        try:
+            image = Image.open(img_path).convert('RGB')
+            pixel_values = self.processor(image, return_tensors="pt").pixel_values
+            pixel_values = torch.squeeze(pixel_values)
+            # pixel_values = torch.unsqueeze(pixel_values,0)
 
-        # print(type(pixel_values))
-        # print(pixel_values.shape)
-        target = torch.LongTensor(target)
-        target_length = torch.LongTensor(target_length)
+            # print(type(pixel_values))
+            # print(pixel_values.shape)
+            target = torch.LongTensor(target)
+            target_length = torch.LongTensor(target_length)
+        except:
+            print('Corrupted image for %d' % index)
+            return self[index + 1]
             
         return pixel_values, target, target_length
 
